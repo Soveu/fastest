@@ -10,37 +10,41 @@ def run(exe, inputfunc, timeout=1, tests=10, stripOutput=True):
         timep = time.perf_counter()
 
         try:
-            proc = subprocess.Popen(
+            proc = subprocess.run(
                     [exe], 
-                    stdin=subprocess.PIPE,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
+                    capture_output=True, 
+                    input=give, 
+                    check=True,
+                    timeout=timeout
                 )
-            stdout, stderr = proc.communicate(input=give, timeout=timeout)
         except subprocess.TimeoutExpired as e:
             print('FAIL')
             print("Timed out after %.02f seconds" % e.timeout)
-            proc.kill()
-            stdout, stderr = proc.communicate()
+            return
+        except subprocess.CalledProcessError as e:
+            print('FAIL')
+            print("Process '%s' returned non-zero exit status %d" % (e.cmd, e.returncode))
+            print(e.stdout.decode('utf-8'))
+            print(e.stderr.decode('utf-8'))
             return
 
         deltatime = time.perf_counter() - timep
         averagetime += (deltatime - averagetime) / i
 
         if stripOutput:
-            flag = (expect == stdout.strip())
+            flag = (expect == proc.stdout.strip())
         else:
-            flag = (expect == stdout)
+            flag = (expect == proc.stdout)
     
         if(flag):
             print("Time: %fs, Average: %fs" % (deltatime, averagetime))
         else:
             print('FAIL')
             print("Expected:", expect)
-            print("Got:", stdout, stderr)
+            print("Got:", proc.stdout)
             return
 
-def procmp(exe1, exe2, inputfunc, tests=10):
+def compare_processes(exe1, exe2, inputfunc, tests=10):
     averagetime = 0.0
 
     for i in range(1, tests+1):
@@ -48,16 +52,15 @@ def procmp(exe1, exe2, inputfunc, tests=10):
         print("[%02d/%02d] " % (i, tests), end='', flush=True)
         timep = time.perf_counter()
 
-        proc = subprocess.Popen(
-                ['./procmp/procmp', exe1, exe2], 
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-            )
-        stdout, stderr = proc.communicate(input=give)
-
-        if proc.returncode != 0:
-            print("Process returned with status %d\n%s\n" % (proc.poll(), stdout.decode('utf-8')))
+        try:
+            proc = subprocess.run(
+                    ['./procmp/procmp', exe1, exe2], 
+                    input=give, 
+                    check=True,
+                )
+        except subprocess.CalledProcessError as e:
+            print("Process '%s' returned non-zero exit status %d" % (e.cmd, e.returncode))
+            return
 
         deltatime = time.perf_counter() - timep
         averagetime += (deltatime - averagetime) / i

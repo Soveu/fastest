@@ -3,7 +3,7 @@
 import random
 import time
 
-import autotesting 
+import autotesting as tests
 
 def createInput(x):
     x = random.random()
@@ -27,7 +27,7 @@ def bashtest(i):
     return bytearray("echo %d $RANDOM\n" % i, encoding='ascii')
 
 if __name__ == '__main__':
-    autotesting.run('python', createInput, tests=10, timeout=0.95, stripOutput=False)
-    autotesting.run('python', unitTesting, tests=len(unittests), timeout=0.3, stripOutput=False)
-    autotesting.compare_processes(sh, sh, bashtest);
+    tests.run('python', createInput, tests=10, timeout=0.95, stripOutput=False)
+    tests.run('python', unitTesting, tests=len(unittests), timeout=0.35, stripOutput=False)
+    tests.procmp(sh, sh, bashtest);
 
