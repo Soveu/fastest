@@ -1,5 +1,14 @@
 #include <unistd.h>
 
+/* 
+Do not optimize duplicate_fd_content with mmap() or tee() - they give none to
+minimal improvement over read() and write(). Also, mmap() can be only used for
+objects with known length (files), and tee() only for pipes.
+
+Example implementation can be found in
+duplicate_pipe_content_*.cpp
+*/
+
 ssize_t duplicate_fd_content(int fdFrom, int fdOne, int fdTwo) {
   char buf[4096];
 
