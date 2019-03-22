@@ -24,7 +24,7 @@ def unitTesting(x):
 
 sh = '/bin/bash'
 def bashtest(i):
-    return bytearray("echo %d $RANDOM\n" % i, encoding='ascii')
+    return bytearray("echo %d\n" % i, encoding='ascii')
 
 if __name__ == '__main__':
     tests.run('python', createInput, tests=10, timeout=0.95, stripOutput=False)

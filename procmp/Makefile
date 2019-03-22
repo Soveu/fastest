@@ -1,5 +1,6 @@
 CC=g++
-FLAGS=-O3 -march=native
+WARNINGS=-Wall -Wextra -Wshadow
+FLAGS=-O3 -march=native $(WARNINGS)
 FILES=buffer.cpp pchild.cpp duplicate_fd_content.cpp
 SH=/bin/bash
 TEST=./procmp $(SH) $(SH)

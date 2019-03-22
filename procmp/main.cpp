@@ -30,9 +30,7 @@ int main(int argc, char** argv, char** envp) {
     return 4;
   }
 
-  size_t checkedTill = 0;
   bool canRead = true;
-  bool isCorrect = true;
   ssize_t a, b;
   do {
     if(canRead) {
@@ -57,15 +55,6 @@ int main(int argc, char** argv, char** envp) {
       perror("ReadFromFd");
       return 6;
     }
-
-    size_t toCheck = std::min(buffer.written, buffee.written) - checkedTill;
-    if(isCorrect) {
-      isCorrect = (std::memcmp(buffer.data() + checkedTill,
-                               buffee.data() + checkedTill,
-                               toCheck) == 0);
-    }
-
-    checkedTill += toCheck;
   } while(a > 0 && b > 0);
 
   close(tester.pipeOut);
@@ -74,7 +63,7 @@ int main(int argc, char** argv, char** envp) {
   waitpid(tester.pid, &status, 0);
   waitpid(testee.pid, &status, 0);
 
-  if(!isCorrect) {
+  if(buffer.written == buffee.written && std::memcmp(buffer.data(), buffee.data(), buffer.written)) {
     write(1, "\nExpected: --------\n", 20);
     write(1, buffer.data(), buffer.written);
     write(1, "\nGot: -------------\n", 20);
