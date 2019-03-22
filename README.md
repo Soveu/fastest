@@ -4,7 +4,8 @@ kind of online judge.
 
 ## Dependencies
 * Python 3.6
-* GCC/Clang for compiling `procmp`
+* GCC/Clang and Unix-like system, which supports `fork`, `pipe`, `read` and `write` \
+  for compiling `procmp`
 
 ## Usage
 See example.py
@@ -15,7 +16,7 @@ See example.py
 Because `subprocess.communicate()` in Python 2 does not support timeouts
 
 ### Why the script is written in Python, but `procmp` is in C++?
-Using lower-level functions like `read()` and `write()` in C have a benefit
+Using lower-level functions like `read` and `write` in C have a benefit
 of not blocking the flow of a program, because they can read/write less data
 than its length and it is OK - their return value indicates how many bytes
 were actually read/written. In python `read()` and `write()` can lead to
@@ -23,4 +24,8 @@ unpleasant deadlocks.
 
 BUT if you have a clever idea how to solve it, feel free to write the code and
 push changes here.
+
+### Why does it not work on Windows?
+Inter-process communication is much easier on Unix-like systems with `fork`, `pipe`,
+`read`, `write`, but you can give it a try on WSL. (not tested yet)
 
