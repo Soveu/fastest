@@ -1,4 +1,2 @@
 procmp/procmp: procmp/*
-	cd procmp
-	make
-	make test
+	make --directory procmp/

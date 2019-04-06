@@ -34,8 +34,17 @@ int main(int argc, char** argv, char** envp) {
   ssize_t a, b;
   do {
     if(canRead) {
-      ssize_t n = duplicate_fd_content(STDIN_FILENO,
-                                       tester.pipeIn, testee.pipeIn);
+      ssize_t n;
+
+      /* This prevents from getting a deadlock when a process needs whole input
+       * to produce output. 
+       * 4096 is the size of the buffer inside duplicate_pipe_content() function
+       */
+      do {
+        n = duplicate_fd_content(STDIN_FILENO,
+                                 tester.pipeIn, testee.pipeIn);
+      } while(n == 4096);
+
       if(n <= 0) {
         if(n == -1) {
           perror("duplicate_pipe_content");

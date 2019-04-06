@@ -15,6 +15,13 @@ See example.py
 ### Why Python 3, not 2?
 Because `subprocess.communicate()` in Python 2 does not support timeouts
 
+### What is `procmp`?
+`procmp` is a simple tool that:
+* takes input
+* duplicates it between two programs
+* collects input
+* compares it, when it is equal, prints nothing and returns 0, if not, prints the output from both and returns 1
+
 ### Why the script is written in Python, but `procmp` is in C++?
 Using lower-level functions like `read` and `write` in C have a benefit
 of not blocking the flow of a program, because they can read/write less data
