@@ -16,7 +16,7 @@
 #include "process_child.c"
 #include "buffer.c"
 
-const char MEMFILENAME[] = "/dev/shm/fastest";
+const char MEMFILENAME[] = "fastest_stdin";
 
 bool revent_is_ok(int revent) {
   return !(revent == POLLNVAL || revent == POLLERR || revent == POLLHUP);
@@ -88,24 +88,21 @@ int main(int argc, char** argv) {
       goto destructors;
     }
 
-    if(x == 0) {
-      puts("Timeout");
+    /* Timeout, check if something happened to children */
+    if(x == 0) for(int i=0; i<2; ++i) {
+      int pid = waitpid(child[i].pid, &child[i].status, WNOHANG);
 
-      for(int i=0; i<2; ++i) {
-        int pid = waitpid(child[i].pid, &child[i].status, WNOHANG);
+      /* Nothing happened */
+      if(pid == 0) continue; 
 
-        /* Nothing happened */
-        if(pid == 0) continue; 
-
-        /* This should NOT happen */
-        if(pid == -1) {
-          perror("waitpid (after poll timeout)");
-          goto destructors;
-        }
-
-        child[i].running = false;
+      /* This should NOT happen */
+      if(pid == -1) {
+        perror("waitpid (after poll timeout)");
         goto destructors;
       }
+
+      child[i].running = false;
+      goto destructors;
     }
 
     for(int i=0; i<2; ++i) {
@@ -167,7 +164,7 @@ close_fd:
   }
 close_memfd:
   close(memfd);
-  unlink(MEMFILENAME);
+  shm_unlink(MEMFILENAME);
 
   return 0;
 }
