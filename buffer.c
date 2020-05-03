@@ -82,3 +82,25 @@ ssize_t read_fd_to_buffer(int fd, struct Buffer* buf) {
   return x;
 }
 
+uint64_t get_hash(const struct Buffer* buf) {
+  uint64_t hash = 0;
+
+  uint64_t* ptr = (uint64_t*)(buf->ptr);
+  const size_t n = (buf->size) / 8;
+
+  for(size_t i=0; i<n; ++i) {
+    hash ^= *ptr;
+    ++ptr;
+  }
+
+  uint64_t rest = 0;
+  char* rest_ptr = (char*)ptr;
+  const size_t rest_n = (buf->size) % 8;
+
+  for(size_t i=0; i<rest_n; ++i) {
+    rest |= rest_ptr[i];
+    rest <<= 8;
+  }
+
+  return hash ^ rest ^ (buf->size);
+}

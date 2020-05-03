@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 struct ProcessChild {
   int   stdin;
@@ -79,5 +80,29 @@ struct ProcessChild spawn_process_child(
   child.running = (waitpid(child.pid, &child.status, WNOHANG) == 0);
 
   return child;
+}
+
+bool is_child_ok(struct ProcessChild* pc) {
+  int pid = waitpid(pc->pid, &pc->status, WNOHANG);
+  
+  /* Nothing happened */
+  if(pid == 0) return true; 
+  
+  /* This should NOT happen */
+  if(pid == -1) {
+    perror("waitpid @ is_child_ok");
+    return false;
+  }
+  
+  pc->running = false;
+  return pc->status == 0;
+}
+
+bool are_children_ok(struct ProcessChild* children, size_t n) {
+  for(int i=0; i<n; ++i) {
+    if(!is_child_ok(&children[i])) return false;
+  }
+
+  return true;
 }
 
